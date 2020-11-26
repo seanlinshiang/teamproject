@@ -63,7 +63,7 @@ Line * line_select(LineSet * type){
     }
     return temp;//return the line's pointer
 }
-void DataGen(char* input);
+void data_gen(char* input);
 int main (){
     LineSet* type =(LineSet*) malloc(sizeof(LineSet));
     type->line_array = (Line**)malloc(10*sizeof(Line*));
