@@ -42,28 +42,8 @@ typedef struct {
 	Line_set* type3;
 }Factory;
 
-/*Select the line that has the least artifacts on it*/
-/*Parameters: the pointer of the type of LineSet 
-Return: the pointer of the line selected*/
-Line * line_select(LineSet * type){
-    int i;
-    if(type->count<=0){
-        printf("ERROR, THE COUNT IN THE LINESET <=0\n");
-        return NULL;
-    }//foolproof
-    int min = type->line_array[0]->count;//set the first one as the minimum
-    Line* temp = type->line_array[0];
-    int size = type->count;
-    /*finding the minimum by greedy algorithm*/
-    for(i = 1;i < size; i++){
-        if(min> type->line_array[i]->count){
-            min = type->line_array[i]->count;
-            temp = type->line_array[i];
-        }
-    }
-    return temp;//return the line's pointer
-}
 void data_gen(char* input);
+Line * line_select(line_set*);
 int main (){
     LineSet* type =(LineSet*) malloc(sizeof(LineSet));
     type->line_array = (Line**)malloc(10*sizeof(Line*));
@@ -79,7 +59,7 @@ int main (){
 }
 void data_gen(char* input){//User should input the pointer of the string, there is an example under the code.
     if(DEBUG_STATE){
-	    printf("data_gen()==>start!\n");
+	    printf("data_gen()==>START!\n");
     }
     int i;
     int count=NUMBER_OF_ARTIFACTS;
@@ -102,11 +82,9 @@ void data_gen(char* input){//User should input the pointer of the string, there 
     //insert "END" at the end of FILE, if it make it difficult for you to read the testing data, you can delete this line as will, ha ha.
     fprintf(Test_data,"END\n");                             
     fclose(Test_data);
-    
-
-	if(DEBUG_STATE){
-		printf("data_gen()==>END!\n");
-	}
+    if(DEBUG_STATE){
+	printf("data_gen()==>END!\n");
+    }
     //Example
     /*
     int i;
@@ -132,4 +110,32 @@ void data_gen(char* input){//User should input the pointer of the string, there 
     }
     fclose(INPUT);
     */
+}
+
+/*Select the line that has the least artifacts on it*/
+/*Parameters: the pointer of the type of LineSet 
+Return: the pointer of the line selected*/
+Line * line_select(line_set * type){
+    if(DEBUG_STATE){
+	printf("line_set()==>START!\n");
+    }
+    int i;
+    if(type->count<=0){
+        printf("ERROR, THE COUNT IN THE LINESET <=0\n");
+        return NULL;
+    }//foolproof
+    int min = type->line_array[0]->count;//set the first one as the minimum
+    Line* temp = type->line_array[0];
+    int size = type->count;
+    /*finding the minimum by greedy algorithm*/
+    for(i = 1;i < size; i++){
+        if(min> type->line_array[i]->count){
+            min = type->line_array[i]->count;
+            temp = type->line_array[i];
+        }
+    }
+    if(DEBUG_STATE){
+	printf("data_gen()==>END!\n");
+    }
+    return temp;//return the line's pointer
 }
