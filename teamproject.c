@@ -135,7 +135,7 @@ Line * line_select(line_set * type){
         }
     }
     if(DEBUG_STATE){
-	printf("data_gen()==>END!\n");
+	    printf("data_gen()==>END!\n");
     }
     return temp;//return the line's pointer
 }
