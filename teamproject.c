@@ -44,19 +44,25 @@ typedef struct {
 
 void data_gen(char* input);
 Line * line_select(Line_set*);
+
 int main (){
-    LineSet* type =(LineSet*) malloc(sizeof(LineSet));
-    type->line_array = (Line**)malloc(10*sizeof(Line*));
-    type->count = 0;
-    int i = 0;
-    for(i = 0;i < 10;i++){
-        type->line_array[i] = (Line*)malloc(sizeof(Line));
-        type->line_array[i]->count = 3-i;
-    }
-    Line* temp = line_select(type);
-    printf("%d",temp->count);
-    //test
+    char filename [20];
+    Factory factory;
+    /* IMPORTANT!! ONLY UNCOMMENT BELOW WHEN YOUR FUNCTION IS READY */
+    /*PreSet*/
+    
+    data_gen(filename);
+    //factory = fact_spec();
+    //create_ord();
+	
+    /*Simulation*/
+	
+    //simulation(factory, ask_time());
+    //sum_up(factory->type1);
+    //sum_up(factory->type2);
+    //sum_up(factory->type3);
 }
+
 void data_gen(char* input){//User should input the pointer of the string, there is an example under the code.
     if(DEBUG_STATE){
 	    printf("data_gen()==>START!\n");
