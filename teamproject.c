@@ -43,7 +43,7 @@ typedef struct {
 }Factory;
 
 void data_gen(char* input);
-Line * line_select(line_set*);
+Line * line_select(Line_set*);
 int main (){
     LineSet* type =(LineSet*) malloc(sizeof(LineSet));
     type->line_array = (Line**)malloc(10*sizeof(Line*));
@@ -115,7 +115,7 @@ void data_gen(char* input){//User should input the pointer of the string, there 
 /*Select the line that has the least artifacts on it*/
 /*Parameters: the pointer of the type of LineSet 
 Return: the pointer of the line selected*/
-Line * line_select(line_set * type){
+Line * line_select(Line_set * type){
     if(DEBUG_STATE){
 	    printf("line_set()==>START!\n");
     }
