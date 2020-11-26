@@ -1,5 +1,13 @@
+#define DEBUG_STATE 1//1=ON,0=OFF
+
+#define ARRIVAL_MAX_TIME 20
+#define NUMBER_OF_ARTIFACTS 20
+
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 typedef struct item { 
 	int type; 
@@ -55,7 +63,7 @@ Line * line_select(LineSet * type){
     }
     return temp;//return the line's pointer
 }
-
+void DataGen(char* input);
 int main (){
     LineSet* type =(LineSet*) malloc(sizeof(LineSet));
     type->line_array = (Line**)malloc(10*sizeof(Line*));
@@ -68,4 +76,60 @@ int main (){
     Line* temp = line_select(type);
     printf("%d",temp->count);
     //test
+}
+void data_gen(char* input){//User should input the pointer of the string, there is an example under the code.
+    if(DEBUG_STATE){
+	    printf("data_gen()==>start!\n");
+    }
+    int i;
+    int count=NUMBER_OF_ARTIFACTS;
+    //you can change the the file name for here.
+    strcpy(input,"Test_data.txt");
+    FILE* Test_data;
+    //initial the random function for the purpose of to not to get the same number every time.
+    srand(time(NULL));
+    Test_data=fopen(input,"w");
+    //generate some testing data, you can control the counts of testing by the variable "count"
+    for(i=0;i<count;i++){ 
+        //(random)From Type1 to Type3
+        fprintf(Test_data,"Type%d ",(rand()%3)+1);             
+        //(random)From 0 to (count-1)
+        fprintf(Test_data,"ID:%6d  ",i);         
+        //(random)From 0 to (ARRIVAL_MAX_TIME-1)
+        fprintf(Test_data,"Arrival_time:%6d",rand()%ARRIVAL_MAX_TIME); 
+        fprintf(Test_data,"\n");
+    }
+    //insert "END" at the end of FILE, if it make it difficult for you to read the testing data, you can delete this line as will, ha ha.
+    fprintf(Test_data,"END\n");                             
+    fclose(Test_data);
+    
+
+	if(DEBUG_STATE){
+		printf("data_gen()==>END!\n");
+	}
+    //Example
+    /*
+    int i;
+    char FileName[20],temp[99];
+    FILE *INPUT;
+
+    data_gen(FileName);
+    printf("%s",FileName);
+    INPUT=fopen(FileName,"r");
+    printf("\n");
+    for(i=0;i<10;i++)
+    {
+        fscanf(INPUT,"%s",temp);
+        printf("%5s",temp);//Type0(random)
+        fscanf(INPUT,"%s",temp);
+        printf("%6s",temp);//ID:
+        fscanf(INPUT,"%s",temp);
+        printf("%6s",temp);//6245(random)
+        fscanf(INPUT,"%s",temp);
+        printf("%15s",temp);//Arrival_time:
+        fscanf(INPUT,"%s",temp);
+        printf("%6s\n",temp);//254(random)
+    }
+    fclose(INPUT);
+    */
 }
