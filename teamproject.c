@@ -47,7 +47,7 @@ Line * line_select(Line_set*);
 
 int main (){
     char filename [20];
-    Factory factory;
+    Factory* factory;
     /* IMPORTANT!! ONLY UNCOMMENT BELOW WHEN YOUR FUNCTION IS READY */
     /*PreSet*/
     
