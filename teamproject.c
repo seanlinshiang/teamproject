@@ -83,7 +83,7 @@ void data_gen(char* input){//User should input the pointer of the string, there 
     fprintf(Test_data,"END\n");                             
     fclose(Test_data);
     if(DEBUG_STATE){
-	printf("data_gen()==>END!\n");
+	    printf("data_gen()==>END!\n");
     }
     //Example
     /*
@@ -117,7 +117,7 @@ void data_gen(char* input){//User should input the pointer of the string, there 
 Return: the pointer of the line selected*/
 Line * line_select(line_set * type){
     if(DEBUG_STATE){
-	printf("line_set()==>START!\n");
+	    printf("line_set()==>START!\n");
     }
     int i;
     if(type->count<=0){
