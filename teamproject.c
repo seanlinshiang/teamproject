@@ -41,5 +41,5 @@ int main (){
     }
     Line* temp = line_select(type);
     printf("%d",temp->count);
-    printf("hello world");
+    //test
 }
