@@ -1,12 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
-typedef struct{
-    int count;
+
+typedef struct item { 
+	int type; 
+	int arrival_time; 
+	int waiting_time; 
+	int processed_time; 
+	char id[50]; 
+	struct item* next; 
+} Artifact;
+
+typedef struct { 
+	int condition; 
+	Artifact* pocessed_item; 
+} Machine;
+
+typedef struct {
+	int count;
+	Artifact* head;
+	Artifact* rear;
+	Machine* machine;
 }Line;
-typedef struct{
-    int count;
-    Line ** line_array;
-}LineSet;
+
+typedef struct {
+	int count;
+	Line** line_array;//array of line
+}Line_set;
+
+typedef struct {
+	Artifact* order_list;
+	Line_set* type1;
+	Line_set* type2;
+	Line_set* type3;
+}Factory;
 
 /*Select the line that has the least artifacts on it*/
 /*Parameters: the pointer of the type of LineSet 
