@@ -20,7 +20,7 @@ typedef struct item {
 
 typedef struct { 
 	int condition; 
-	Artifact* pocessed_item; 
+	Artifact* processed_item; 
 } Machine;
 
 typedef struct {
