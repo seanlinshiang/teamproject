@@ -72,7 +72,7 @@ void data_gen(char* input){//User should input the pointer of the string, there 
     //you can change the the file name for here.
     strcpy(input,"Test_data.txt");
     FILE* Test_data;
-    //initial the random function for the purpose of to not to get the same number every time.
+    //Initialize the random function for the purpose of to not to get the same number every time.
     srand(time(NULL));
     Test_data=fopen(input,"w");
     //generate some testing data, you can control the counts of testing by the variable "count"
@@ -117,6 +117,49 @@ void data_gen(char* input){//User should input the pointer of the string, there 
     fclose(INPUT);
     */
 }
+
+Factory* fact_spec(){
+    if(DEBUG_STATE)printf("fact_spec()==>START!\n");
+    
+    //Read the factory setting data from file
+    FILE *Fact_spec_file;
+    int Type_count[3];
+    char temp[10];
+    char filename[30];
+    //if(DEBUG_STATE)printf("fact_spec()read file==>START!\n");
+    //You can change the filename from here
+    strcpy(filename,"Factspec.txt");
+    Fact_spec_file=fopen(filename,"r");
+    fscanf(Fact_spec_file,"%s %d",temp,&Type_count[0]);
+    fscanf(Fact_spec_file,"%s %d",temp,&Type_count[1]);
+    fscanf(Fact_spec_file,"%s %d",temp,&Type_count[2]);
+    fclose(Fact_spec_file);
+    //if(DEBUG_STATE)printf("fact_spec()read file==>END!\n");
+
+    //Initialize each data in the "NEW_factory"
+    Factory* New_factory;
+
+    New_factory=(Factory*)malloc(sizeof(Factory));
+
+    New_factory->order_list=NULL;
+    //Type1
+    New_factory->type1=(Line_set*)malloc(sizeof(Line_set));
+    New_factory->type1->count=Type_count[0];
+    New_factory->type1->line_array=NULL;
+    //Type2
+    New_factory->type2=(Line_set*)malloc(sizeof(Line_set));
+    New_factory->type2->count=Type_count[1];
+    New_factory->type2->line_array=NULL;
+    //Type3
+    New_factory->type3=(Line_set*)malloc(sizeof(Line_set));
+    New_factory->type3->count=Type_count[2];
+    New_factory->type3->line_array=NULL;
+
+
+    if(DEBUG_STATE)printf("fact_spec()==>END!\n");
+    return New_factory;
+}
+
 
 /*Select the line that has the least artifacts on it*/
 /*Parameters: the pointer of the type of LineSet 
