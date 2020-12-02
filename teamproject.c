@@ -127,9 +127,10 @@ void data_gen(char* input){//User should input the pointer of the string, there 
 
 Factory* fact_spec(){
     if(DEBUG_STATE)printf("fact_spec()==>START!\n");
-    
+
     //Read the factory setting data from file
     FILE *Fact_spec_file;
+    int i;
     int Type_count[3];
     char temp[10];
     char filename[30];
@@ -152,20 +153,55 @@ Factory* fact_spec(){
     //Type1
     New_factory->type1=(Line_set*)malloc(sizeof(Line_set));
     New_factory->type1->count=Type_count[0];
-    New_factory->type1->line_array=NULL;
+    New_factory->type1->line_array=(Line**)malloc(Type_count[0]*sizeof(Line*));
+    for(i=0;i<Type_count[0];i++){
+        New_factory->type1->line_array[i]=(Line*)malloc(sizeof(Line));
+        //Initialize
+        New_factory->type1->line_array[i]->count=0;
+        New_factory->type1->line_array[i]->head=NULL;
+        New_factory->type1->line_array[i]->machine=(Machine*)malloc(sizeof(Machine));
+        New_factory->type1->line_array[i]->machine->condition=0;
+        New_factory->type1->line_array[i]->machine->processed_item=NULL;
+        New_factory->type1->line_array[i]->rear=NULL;
+    }
+
+
     //Type2
     New_factory->type2=(Line_set*)malloc(sizeof(Line_set));
     New_factory->type2->count=Type_count[1];
-    New_factory->type2->line_array=NULL;
+    New_factory->type2->line_array=(Line**)malloc(Type_count[1]*sizeof(Line*));
+    for(i=0;i<Type_count[1];i++){
+        New_factory->type2->line_array[i]=(Line*)malloc(sizeof(Line));
+        //Initialize
+        New_factory->type2->line_array[i]->count=0;
+        New_factory->type2->line_array[i]->head=NULL;
+        New_factory->type2->line_array[i]->machine=(Machine*)malloc(sizeof(Machine));
+        New_factory->type2->line_array[i]->machine->condition=0;
+        New_factory->type2->line_array[i]->machine->processed_item=NULL;
+        New_factory->type2->line_array[i]->rear=NULL;
+    }
+
+
     //Type3
     New_factory->type3=(Line_set*)malloc(sizeof(Line_set));
     New_factory->type3->count=Type_count[2];
-    New_factory->type3->line_array=NULL;
+    New_factory->type3->line_array=(Line**)malloc(Type_count[2]*sizeof(Line*));
+    for(i=0;i<Type_count[2];i++){
+        New_factory->type3->line_array[i]=(Line*)malloc(sizeof(Line));
+        //Initialize
+        New_factory->type3->line_array[i]->count=0;
+        New_factory->type3->line_array[i]->head=NULL;
+        New_factory->type3->line_array[i]->machine=(Machine*)malloc(sizeof(Machine));
+        New_factory->type3->line_array[i]->machine->condition=0;
+        New_factory->type3->line_array[i]->machine->processed_item=NULL;
+        New_factory->type3->line_array[i]->rear=NULL;
+    }
 
 
     if(DEBUG_STATE)printf("fact_spec()==>END!\n");
     return New_factory;
 }
+
 
 Artifact* getdata_from_file(FILE* input, int type) {
 	Artifact* new_item = (Artifact*)malloc(sizeof(Artifact));
