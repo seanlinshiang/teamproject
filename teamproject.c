@@ -3,6 +3,9 @@
 #define ARRIVAL_MAX_TIME 20
 #define NUMBER_OF_ARTIFACTS 20
 
+#define TYPE1_Processed_Time 1//processed time for type1
+#define TYPE2_Processed_Time 2//processed time for type2
+#define TYPE3_Processed_Time 3//processed time for type3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +46,11 @@ typedef struct {
 }Factory;
 
 void data_gen(char* input);
+Artifact* getdata_from_file(FILE*, int);
+void insert_to_orderlist(Artifact**, Artifact*);
+void create_orderlist(char[], Factory*);
 Line * line_select(Line_set*);
+void simulation(Factory*, int);
 
 int main (){
     char filename [20];
@@ -160,6 +167,92 @@ Factory* fact_spec(){
     return New_factory;
 }
 
+Artifact* getdata_from_file(FILE* input, int type) {
+	Artifact* new_item = (Artifact*)malloc(sizeof(Artifact));
+	char id_title[20];
+	char arrival_time_title[20];
+	new_item->type = type;
+	fscanf(input, "%s%s", id_title, new_item->id);
+	new_item->waiting_time = 0;
+	switch (type) {
+	case 1:
+		new_item->processed_time = TYPE1_Processed_Time;
+		break;
+	case 2:
+		new_item->processed_time = TYPE2_Processed_Time;
+		break;
+	case 3:
+		new_item->processed_time = TYPE3_Processed_Time;
+		break;
+	default:
+		break;
+	}
+	fscanf(input, "%s%d", arrival_time_title, &(new_item->arrival_time));
+	new_item->next = NULL;
+	return new_item;
+}
+
+void insert_to_orderlist(Artifact** node_of_orderlist, Artifact* new_item) {
+	if (DEBUG_STATE) {
+		printf("insert to orderlist START\n");
+	}
+
+	if (*node_of_orderlist == NULL) {
+		*node_of_orderlist = new_item;
+	}
+	else if (new_item->arrival_time <= (*node_of_orderlist)->arrival_time) {
+		new_item->next = *node_of_orderlist;
+		*node_of_orderlist = new_item;
+	}
+	else {
+		Artifact* tem = (Artifact*)(*node_of_orderlist);
+		while (1) {
+			if (tem->next == NULL) {
+				break;
+			}
+			else if (new_item->arrival_time > tem->next->arrival_time) {
+				tem = tem->next;
+			}
+			else {
+				break;
+			}
+		}
+		if (tem->next == NULL) {
+			new_item->next = NULL;
+			tem->next = new_item;
+		}
+		else {
+			new_item->next = tem->next;
+			tem->next = new_item;
+		}
+	}
+
+	if (DEBUG_STATE) {
+		printf("insert to orderlist END!\n");
+	}
+}
+
+void create_orderlist(char filename[50], Factory* factory) {
+	if (DEBUG_STATE) {
+		printf("create order list START\n");
+	}
+
+	FILE* input = fopen(filename, "r");//open the file where the data of artifact is
+	int type;
+	char type_title[20];
+
+	/*before reach end of file, read data from file and insert them in ascending order according to arrival time. */
+	while (fscanf(input, "%s%d", type_title, &type) != EOF) {
+		//insert_to_orderlist is used to put artifact to the right position in orderlist
+		//getdata_from_file is used to read data from file then put data into a artifact
+		insert_to_orderlist(&(factory->order_list), getdata_from_file(input, type));
+	}
+	fclose(input);
+
+	if (DEBUG_STATE) {
+		printf("create order list END\n");
+	}
+}
 
 /*Select the line that has the least artifacts on it*/
 /*Parameters: the pointer of the type of LineSet 
@@ -187,4 +280,43 @@ Line * line_select(Line_set * type){
 	    printf("data_gen()==>END!\n");
     }
     return temp;//return the line's pointer
+}
+
+void simulation(Factory* factory, int Max_time) {
+	if (DEBUG_STATE) {
+		printf("Simulation START\n");
+	}
+
+	Artifact* tem = (Artifact*)factory->order_list;
+	/*t is the time unit*/
+	for (int t = 0; t < Max_time; t++) {
+		//while there is still artifact isn't been insert enqueue into the line
+		if (tem != NULL) {
+			//when artifact's arrival_time == t, enqueue artifact into the correct line. 
+			while (tem->arrival_time == t) {
+				switch (tem->type)
+				{
+				//Type 1
+				case 1:
+					enqueue(line_select(factory->type1), tem);
+					break;
+				//Type 2
+				case 2:
+					enqueue(line_select(factory->type2), tem);
+					break;
+				//Type 3
+				case 3:
+					enqueue(line_select(factory->type3), tem);
+					break;
+				default:
+					break;
+				}
+				tem = tem->next;
+			}
+		}
+	}
+
+	if (DEBUG_STATE) {
+		printf("Simulation END\n");
+	}
 }
