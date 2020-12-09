@@ -333,6 +333,7 @@ void simulation(Factory* factory, int Max_time) {
 		if (tem != NULL) {
 			//when artifact's arrival_time == t, enqueue artifact into the correct line. 
 			while (tem->arrival_time == t) {
+				Artifact * temnext = tem->next;
 				switch (tem->type)
 				{
 				//Type 1
@@ -350,7 +351,7 @@ void simulation(Factory* factory, int Max_time) {
 				default:
 					break;
 				}
-				tem = tem->next;
+				tem = temnext;
 			}
 		}
 	}
@@ -364,47 +365,54 @@ void simulation(Factory* factory, int Max_time) {
 Artifact * dequeue(Line *line, int t)
 {
     if (DEBUG_STATE) {
-		printf("Simulation START\n");
+		printf("dequeue START\n");
 	}
-    line->rear->wait = t - line->rear->arrival_time;
-    Line * temp;          //memory line->head
-    Artifact * pre;       //previous memory
-    temp->head = line->head;
-    while(1)
-    {
-        if(temp->head != temp->rear)
-        {
-            pre  = temp->head;
-            temp->head = temp->head->next;
-        }
-        if(temp->head == temp->rear)
-        {
-            line->rear = pre;
-            break;
-        }
+    if(line->count==0){
+	    return NULL;
     }
-    return line->rear;
+    line->rear->wait = t - line->rear->arrival_time;
+    Artifact * temp;          //memory line->head
+    Artifact * pre;       //previous memory
+    temp = line->head;
+    if(temp == line->rear){
+	 line->rear = NULL;
+    }else{
+	while(1)
+    	{
+        	if(temp!= line->rear)
+        	{
+            		pre  = temp;
+            		temp = temp->next;
+        	}
+		if(temp == line->rear)
+        	{
+            		line->rear = pre;
+            		break;
+        	}
+    	}
+    }	    
+
+    line->count--;
     if (DEBUG_STATE) {
-		printf("Simulation END\n");
-	}
+        printf("dequeue END\n");
+    }
+    return temp;
+    
 }
 
 
 void enqueue(Line * line,Artifact * artifact)
 {
     if (DEBUG_STATE) {
-		printf("Simulation START\n");
+		printf("enqueue START\n");
 	}
-    artifact = malloc(sizeof(Artifact));
-    line = malloc(sizeof(Line));
-    if(line->head = NULL && line->rear = NULL )
+    //artifact = malloc(sizeof(Artifact));
+    //line = malloc(sizeof(Line));
+    if(line->count == 0)
     {
-        line->rear = artifact;
-    }
-    else if(line->head == NULL && line->rear != NULL)
-    {
+	artifact->next = line->head;
         line->head = artifact;
-        line->head->next = line->rear;
+        line->rear = artifact;
     }
     else
     {
@@ -413,13 +421,13 @@ void enqueue(Line * line,Artifact * artifact)
     }
     line->count++;
      if (DEBUG_STATE) {
-		printf("Simulation END\n");
+		printf("enqueue END\n");
 	}
 }
 
 int sum_up(LineSet * lineset){
     if (DEBUG_STATE) {
-		printf("Simulation START\n");
+		printf("sumup START\n");
 	}
     int sum;
     Line * temp;
@@ -432,8 +440,9 @@ int sum_up(LineSet * lineset){
             temp->head = line->temp->next;
         }
     }
-    return sum;
+
      if (DEBUG_STATE) {
-		printf("Simulation END\n");
+		printf("sumup END\n");
 	}
+    return sum;
 }
