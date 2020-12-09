@@ -356,6 +356,8 @@ void simulation(Factory* factory, int Max_time) {
 				tem = temnext;
 			}
 		}
+	//Refresh the machine
+        machine_refresh(factory, t);
 	}
 
 	if (DEBUG_STATE) {
