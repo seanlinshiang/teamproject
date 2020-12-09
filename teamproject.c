@@ -51,6 +51,9 @@ void insert_to_orderlist(Artifact**, Artifact*);
 void create_orderlist(char[], Factory*);
 Line * line_select(Line_set*);
 void simulation(Factory*, int);
+Artifact * dequeue(Line *, int);
+void enqueue(Line *,Artifact *);
+int sum_up(LineSet *);
 
 int main (){
     char filename [20];
@@ -357,15 +360,7 @@ void simulation(Factory* factory, int Max_time) {
 	}
 }
 
- #include<stdlib.h>
-#include<stdio.h>
-int main(){
 
-
-
-
-
-}
 Artifact * dequeue(Line *line, int t)
 {
     if (DEBUG_STATE) {
@@ -394,15 +389,7 @@ Artifact * dequeue(Line *line, int t)
 	}
 }
 
-#include<stdlib.h>
-#include<stdio.h>
-int main(){
 
-
-
-
-
-}
 void enqueue(Line * line,Artifact * artifact)
 {
     if (DEBUG_STATE) {
