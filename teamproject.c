@@ -356,3 +356,97 @@ void simulation(Factory* factory, int Max_time) {
 		printf("Simulation END\n");
 	}
 }
+
+ #include<stdlib.h>
+#include<stdio.h>
+int main(){
+
+
+
+
+
+}
+Artifact * dequeue(Line *line, int t)
+{
+    if (DEBUG_STATE) {
+		printf("Simulation START\n");
+	}
+    line->rear->wait = t - line->rear->arrival_time;
+    Line * temp;          //memory line->head
+    Artifact * pre;       //previous memory
+    temp->head = line->head;
+    while(1)
+    {
+        if(temp->head != temp->rear)
+        {
+            pre  = temp->head;
+            temp->head = temp->head->next;
+        }
+        if(temp->head == temp->rear)
+        {
+            line->rear = pre;
+            break;
+        }
+    }
+    return line->rear;
+    if (DEBUG_STATE) {
+		printf("Simulation END\n");
+	}
+}
+
+#include<stdlib.h>
+#include<stdio.h>
+int main(){
+
+
+
+
+
+}
+void enqueue(Line * line,Artifact * artifact)
+{
+    if (DEBUG_STATE) {
+		printf("Simulation START\n");
+	}
+    artifact = malloc(sizeof(Artifact));
+    line = malloc(sizeof(Line));
+    if(line->head = NULL && line->rear = NULL )
+    {
+        line->rear = artifact;
+    }
+    else if(line->head == NULL && line->rear != NULL)
+    {
+        line->head = artifact;
+        line->head->next = line->rear;
+    }
+    else
+    {
+        artifact->next = line->head;
+        line->head     = artifact;
+    }
+    line->count++;
+     if (DEBUG_STATE) {
+		printf("Simulation END\n");
+	}
+}
+
+int sum_up(LineSet * lineset){
+    if (DEBUG_STATE) {
+		printf("Simulation START\n");
+	}
+    int sum;
+    Line * temp;
+    temp = line;
+    while(1)
+    {
+        sum += lineset->head->wait;
+        if(temp->head->next != NULL)
+        {
+            temp->head = line->temp->next;
+        }
+    }
+    return sum;
+     if (DEBUG_STATE) {
+		printf("Simulation END\n");
+	}
+}
