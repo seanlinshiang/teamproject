@@ -52,6 +52,8 @@ void create_orderlist(char[], Factory*);
 Line * line_select(Line_set*);
 void simulation(Factory*, int);
 Artifact * dequeue(Line *, int);
+void machine_refresh(Factory*, int);
+void machine_refresh_type(Line_set*,int);
 void enqueue(Line *,Artifact *);
 int sum_up(LineSet *);
 
@@ -400,6 +402,47 @@ Artifact * dequeue(Line *line, int t)
     
 }
 
+/* This function refreshes the machine on every single line*/
+/*Parameters: the pointer of the whole factory and the current time
+Return: void*/
+void machine_refresh(Factory* factory, int t){
+    if(DEBUG_STATE){
+	    printf("machine_refresh()==>START!\n");
+    }
+    /* go through each type of Line_set*/
+    machine_refresh_type(factory->type1,t);
+    machine_refresh_type(factory->type2,t);
+    machine_refresh_type(factory->type3,t);
+    if(DEBUG_STATE){
+	    printf("machine_refresh()==>END!\n");
+    }
+}
+
+void machine_refresh_type(Line_set* type,int t){
+    int i;
+    /* go through each Line of the Line_set type*/
+    for(i=0;i<type->count;i++){
+        Line * temp_line = type->line_array[i];
+        /*if the machine is not processing any item, then deque the item from the line*/
+        if(temp_line->machine->condition==0){
+            Artifact * temp_art = dequeue(temp_line,t);
+            /*if the item exist, the machine will go processed the item
+            and the condition will then be set to 1*/
+            if(temp_art!=NULL){
+                temp_line->machine->processed_item = temp_art;
+                temp_line->machine->condition = 1;
+            }
+        }else{
+            /*The processed time of the processing item decreased by 1*/ 
+            temp_line->machine->processed_item->processed_time--;
+            /*Then if the processed_time is equal to 0, which implies the item is finished 
+            processing, the condition of the machine will be set to 0*/ 
+            if(temp_line->machine->processed_item->processed_time==0){
+                temp_line->machine->condition = 0;
+            }
+        }
+    }
+}
 
 void enqueue(Line * line,Artifact * artifact)
 {
