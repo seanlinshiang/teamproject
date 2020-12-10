@@ -1,11 +1,11 @@
-#define DEBUG_STATE 1//1=ON,0=OFF
+#define DEBUG_STATE 0//1=ON,0=OFF
 
 #define ARRIVAL_MAX_TIME 20
-#define NUMBER_OF_ARTIFACTS 20
+#define NUMBER_OF_ARTIFACTS 100
 
 #define TYPE1_Processed_Time 1//processed time for type1
-#define TYPE2_Processed_Time 2//processed time for type2
-#define TYPE3_Processed_Time 3//processed time for type3
+#define TYPE2_Processed_Time 4//processed time for type2
+#define TYPE3_Processed_Time 10//processed time for type3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +28,7 @@ typedef struct {
 
 typedef struct {
     int count;
+    int max_count;
     Artifact* head;
     Artifact* rear;
     Machine* machine;
@@ -46,16 +47,19 @@ typedef struct {
 }Factory;
 
 void data_gen(char* input);
+Factory* fact_spec();
 Artifact* getdata_from_file(FILE*, int);
 void insert_to_orderlist(Artifact**, Artifact*);
 void create_orderlist(char[], Factory*);
-Line* line_select(Line_set*);
+int line_select(Line_set*);
+int ask_time();
 void simulation(Factory*, int);
-Artifact* dequeue(Line*, int);
+Artifact* dequeue(Line_set*, int, int);
 void machine_refresh(Factory*, int);
 void machine_refresh_type(Line_set*, int);
-void enqueue(Line*, Artifact*);
-int sum_up(Line_set*);
+void printQ(Line*);
+void enqueue(Line_set*,int, Artifact*);
+void sum_up(Line_set*);
 
 int main(void) {
     char filename[20];
@@ -65,14 +69,14 @@ int main(void) {
 
     data_gen(filename);
     factory = fact_spec();
-    //create_ord();
+    create_orderlist(filename,factory);
 
     /*Simulation*/
 
-    //simulation(factory, ask_time());
-    //sum_up(factory->type1);
-    //sum_up(factory->type2);
-    //sum_up(factory->type3);
+    simulation(factory, ask_time());
+    sum_up(factory->type1);
+    sum_up(factory->type2);
+    sum_up(factory->type3);
 
     return 0;
 }
@@ -92,7 +96,7 @@ void data_gen(char* input) {//User should input the pointer of the string, there
     //generate some testing data, you can control the counts of testing by the variable "count"
     for (i = 0; i < count; i++) {
         //(random)From Type1 to Type3
-        fprintf(Test_data, "Type%d ", (rand() % 3) + 1);
+        fprintf(Test_data, "Type %d ", (rand() % 3) + 1);
         //(random)From 0 to (count-1)
         fprintf(Test_data, "ID:%6d  ", i);
         //(random)From 0 to (ARRIVAL_MAX_TIME-1)
@@ -164,6 +168,7 @@ Factory* fact_spec() {
         New_factory->type1->line_array[i] = (Line*)malloc(sizeof(Line));
         //Initialize
         New_factory->type1->line_array[i]->count = 0;
+        New_factory->type1->line_array[i]->max_count = 0;
         New_factory->type1->line_array[i]->head = NULL;
         New_factory->type1->line_array[i]->machine = (Machine*)malloc(sizeof(Machine));
         New_factory->type1->line_array[i]->machine->condition = 0;
@@ -180,6 +185,7 @@ Factory* fact_spec() {
         New_factory->type2->line_array[i] = (Line*)malloc(sizeof(Line));
         //Initialize
         New_factory->type2->line_array[i]->count = 0;
+        New_factory->type2->line_array[i]->max_count = 0;
         New_factory->type2->line_array[i]->head = NULL;
         New_factory->type2->line_array[i]->machine = (Machine*)malloc(sizeof(Machine));
         New_factory->type2->line_array[i]->machine->condition = 0;
@@ -196,6 +202,7 @@ Factory* fact_spec() {
         New_factory->type3->line_array[i] = (Line*)malloc(sizeof(Line));
         //Initialize
         New_factory->type3->line_array[i]->count = 0;
+        New_factory->type3->line_array[i]->max_count = 0;
         New_factory->type3->line_array[i]->head = NULL;
         New_factory->type3->line_array[i]->machine = (Machine*)malloc(sizeof(Machine));
         New_factory->type3->line_array[i]->machine->condition = 0;
@@ -285,6 +292,9 @@ void create_orderlist(char filename[50], Factory* factory) {
 
     /*before reach end of file, read data from file and insert them in ascending order according to arrival time. */
     while (fscanf(input, "%s%d", type_title, &type) != EOF) {
+        if(!strcmp(type_title,"END")){
+            break;
+        }
         //insert_to_orderlist is used to put artifact to the right position in orderlist
         //getdata_from_file is used to read data from file then put data into a artifact
         insert_to_orderlist(&(factory->order_list), getdata_from_file(input, type));
@@ -298,8 +308,8 @@ void create_orderlist(char filename[50], Factory* factory) {
 
 /*Select the line that has the least artifacts on it*/
 /*Parameters: the pointer of the type of LineSet
-Return: the pointer of the line selected*/
-Line* line_select(Line_set* type) {
+Return: the index of the line selected*/
+int line_select(Line_set* type) {
     if (DEBUG_STATE) {
         printf("line_set()==>START!\n");
     }
@@ -309,21 +319,27 @@ Line* line_select(Line_set* type) {
         return NULL;
     }//foolproof
     int min = type->line_array[0]->count;//set the first one as the minimum
-    Line* temp = type->line_array[0];
+    int temp = 0;
     int size = type->count;
     /*finding the minimum by greedy algorithm*/
     for (i = 1; i < size; i++) {
         if (min > type->line_array[i]->count) {
             min = type->line_array[i]->count;
-            temp = type->line_array[i];
+            temp = i;
         }
     }
     if (DEBUG_STATE) {
         printf("data_gen()==>END!\n");
     }
-    return temp;//return the line's pointer
+    return temp;//return the line's index
 }
 
+int ask_time(){
+    int t;
+    printf("Simulation time:");
+    scanf("%d",&t);
+    return t;
+}
 void simulation(Factory* factory, int Max_time) {
     if (DEBUG_STATE) {
         printf("Simulation START\n");
@@ -332,24 +348,25 @@ void simulation(Factory* factory, int Max_time) {
     Artifact* tem = (Artifact*)factory->order_list;
     /*t is the time unit*/
     for (int t = 0; t < Max_time; t++) {
+        printf("-----------------------\nCurrent time: %d\n",t);
         //while there is still artifact isn't been insert enqueue into the line
         if (tem != NULL) {
             //when artifact's arrival_time == t, enqueue artifact into the correct line. 
-            while (tem->arrival_time == t) {
+            while (tem!=NULL && tem->arrival_time == t) {
                 Artifact* temnext = tem->next;
                 switch (tem->type)
                 {
                 //Type 1
                 case 1:
-                    enqueue(line_select(factory->type1), tem);
+                    enqueue(factory->type1,line_select(factory->type1), tem);
                     break;
                 //Type 2
                 case 2:
-                    enqueue(line_select(factory->type2), tem);
+                    enqueue(factory->type2,line_select(factory->type2), tem);
                     break;
                 //Type 3
                 case 3:
-                    enqueue(line_select(factory->type3), tem);
+                    enqueue(factory->type3,line_select(factory->type3), tem);
                     break;
                 default:
                     break;
@@ -367,8 +384,9 @@ void simulation(Factory* factory, int Max_time) {
 }
 
 
-Artifact* dequeue(Line* line, int t)
+Artifact* dequeue(Line_set* lineset, int n, int t)
 {
+    Line* line = lineset->line_array[n];
     if (DEBUG_STATE) {
         printf("dequeue START\n");
     }
@@ -402,6 +420,9 @@ Artifact* dequeue(Line* line, int t)
     if (DEBUG_STATE) {
         printf("dequeue END\n");
     }
+    if(temp!=NULL){
+        printf("Dequeue Item %s from Q%d of type%d\n",temp->id,n,temp->type);
+    }
     return temp;
 
 }
@@ -414,8 +435,11 @@ void machine_refresh(Factory* factory, int t) {
         printf("machine_refresh()==>START!\n");
     }
     /* go through each type of Line_set*/
+    printf("type1:\n");
     machine_refresh_type(factory->type1, t);
+    printf("type2:\n");
     machine_refresh_type(factory->type2, t);
+    printf("type3:\n");
     machine_refresh_type(factory->type3, t);
     if (DEBUG_STATE) {
         printf("machine_refresh()==>END!\n");
@@ -429,7 +453,7 @@ void machine_refresh_type(Line_set* type, int t) {
         Line* temp_line = type->line_array[i];
         /*if the machine is not processing any item, then deque the item from the line*/
         if (temp_line->machine->condition == 0) {
-            Artifact* temp_art = dequeue(temp_line, t);
+            Artifact* temp_art = dequeue(type,i, t);
             /*if the item exist, the machine will go processed the item
             and the condition will then be set to 1*/
             if (temp_art != NULL) {
@@ -443,19 +467,42 @@ void machine_refresh_type(Line_set* type, int t) {
             /*Then if the processed_time is equal to 0, which implies the item is finished
             processing, the condition of the machine will be set to 0*/
             if (temp_line->machine->processed_item->processed_time == 0) {
+                printf("Item %3s process complete\n",temp_line->machine->processed_item->id);
                 temp_line->machine->condition = 0;
+            }else{
+                printf("Item %3s still processing\n",temp_line->machine->processed_item->id);
             }
         }
+        if(temp_line->count>temp_line->max_count){
+            temp_line->max_count = temp_line->count;
+        }
+        printf("Q%d:",i);
+        printQ(temp_line);
+        printf("Maximum: %d\n",temp_line->max_count);
     }
 }
-
-void enqueue(Line* line, Artifact* artifact)
+void printQ(Line* line){
+    Artifact *temp = line->head;
+    if(temp==NULL){
+        printf("\n");
+        return;
+    }else if(line->rear == NULL){
+        printf("\n");
+        return;
+    }
+    while (temp!=line->rear->next){
+        printf("%3s ",temp->id);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+void enqueue(Line_set* lineset,int n, Artifact* artifact)
 {
     if (DEBUG_STATE) {
         printf("enqueue START\n");
     }
-    //artifact = malloc(sizeof(Artifact));
-    //line = malloc(sizeof(Line));
+    Line* line = lineset->line_array[n];
+    printf("Enqueue Item %s to Q%d of type%d\n",artifact->id,n,artifact->type);
     if (line->count == 0)
     {
         artifact->next = line->head;
@@ -472,17 +519,25 @@ void enqueue(Line* line, Artifact* artifact)
         printf("enqueue END\n");
     }
 }
-
-int sum_up(Line_set* lineset) {
+void sum_up(Line_set* lineset) {
     if (DEBUG_STATE) {
         printf("sumup START\n");
     }
 
     int sum = 0;
-    for (int i = 0; i < lineset->count; i++) {
-        Artifact* temp = (Artifact*)lineset->line_array[i]->head;
+    int count = 0;
+    int i;
+    for (i = 0; i < lineset->count; i++) {
+        Artifact * temp;
+        if(lineset->line_array[i]->rear==NULL){
+            temp = lineset->line_array[i]->head;
+        }else{
+            temp = (Artifact*)lineset->line_array[i]->rear->next;//start from processed item
+        }
+        int tempcount = count;
         while (1) {
             if (temp != NULL) {
+                count++;
                 sum += temp->waiting_time;
                 temp = temp->next;
             }
@@ -490,10 +545,13 @@ int sum_up(Line_set* lineset) {
                 break;
             }
         }
+        printf("Type%d: processed Items: Q%d: %d\n",lineset->line_array[0]->head->type,i,count-tempcount);
     }
 
+    double ave = (double)sum/((double)count);
+    printf("Type%d: average: %lf\n",lineset->line_array[0]->head->type,ave);
     if (DEBUG_STATE) {
         printf("sumup END\n");
     }
-    return sum;
+    
 }
